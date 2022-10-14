@@ -1,0 +1,163 @@
+---
+title: "BEE 4750/5750 Homework 3"
+author: "Akanksha Srivastava (as2752)"
+date: `j import Dates; Dates.Date(Dates.now())`
+weave_options:
+    term: true
+    results: tex
+    cache: off
+---
+
+<!-- This setups the environment and installs packages, but doesn't appear in the generated document -->
+<!-- You shouldn't need to modify this -->
+```julia; echo = false; results = "hidden"
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+
+<!--- this block is hidden, but stores the generator and demand data; you can use a dataframe to combine these or refactor as you'd like -->
+```julia; echo = false; results = "hidden"
+# generator data
+investment_cost = [457000, 268000, 85000, 62580, 92000, 92000]
+op_cost = [0, 22, 35, 45, 0, 0]
+co2_emissions = [0, 1, 0.43, 0.55, 0, 0]
+thermal_cf = [0.95, 1, 1, 1]
+
+hours = 1:24
+demand = [1517, 1486, 1544, 1733, 2058, 2470, 2628, 2696, 2653, 2591, 2626, 2714, 2803, 2842, 2891,  2821, 3017, 3074, 2957,  2487, 2249, 1933, 1684, 1563]
+wind_cf = [0.58, 0.57, 0.55, 0.28, 0.14, 0.21, 0.03, 0.04, 0.01, 0.04, 0.04, 0.01, 0.04, 0.04, 0.01, 0.01, 0.01, 0.13, 0.30, 0.45, 0.44, 0.57, 0.55, 0.58]
+solar_cf = [0, 0, 0, 0, 0, 0, 0.20, 0.57, 0.80, 0.93, 0.99, 0.99, 0.85, 0.99, 0.95, 0.81, 0.55, 0.12, 0, 0, 0, 0, 0, 0]
+```
+
+# Problem 1
+
+## Problem 1.1
+For this problem, the decision variables are: 
+1. The installed capacity (MW) of generator type g: $x_g$
+2. The production (MW) from generator type g in period t: $y_{g,t}$
+3. The nonserved load (MW) in each period t: $nse_t$
+
+Here, generators types include geothermal, coal, CCGT, CT, wind, and solar. Periods include every hour from 1 to 24.
+
+We can begin to implement our model in Julia:
+```julia
+using JuMP
+using HiGHS
+
+gencap = Model(HiGHS.Optimizer);
+generators = ["geo","coal","ccgt","ct","wind","solar"];
+G = 1:length(generators);
+T = 1:length(hours);
+@variable(gencap,x[G]>=0);
+@variable(gencap,y[G,T]>=0);
+@variable(gencap,ns[T]>=0);
+```
+
+## Problem 1.2
+The objective function is to minimize the total cost of generation, which is the sum of the investment cost and the operating cost. 
+If $C_g^{INV}$ is the investment cost for generator g, $C_g^{OP}$ is the operating cost for generator g, and $L_t$ is the length 
+of time period $t$:
+
+```math
+minZ = \sum_g C_g^{INV}x_g + \sum_g\sum_t L_t C_g^{OP} y_{g,t} + \sum_t NSE_{cost} nse_t
+```
+
+In Julia, this becomes:
+```julia
+@objective(gencap,Min,investment_cost'*x + 365*(22*sum(y[2,:]) + 35*sum(y[3,:]) + 45*sum(y[4,:]) + 1000*sum(ns)));
+```
+
+## Problem 1.3
+Derive all relevant constraints (you don’t need to write them all out, but they should all be represented through your notation). 
+Make sure to include any needed justifications or derivations. Why is your set of constraints complete?
+
+The constraints of this problem include installed capacity and availability, the need to serve the load 
+in all time frames, and nonnegativity. These can be written out as follows:
+
+1. Installed Capacity and Availability: In a given time period, our $y_{g,t}$ cannot exceed the installed capacity multiplied by the capacity factor, as it is not possibly for the generator to produce more than that quantity. When $CF_g$ is the capacity factor for a given generator,
+
+$y_{g,t}≤CF_g*x_g$
+
+2. Serving Load: The sum of the generated electricity and the nonserved load should equal the demand for that time period, $D_t$.
+
+$\sum_{g} y_{g,t} + nse_t = D_t$
+
+3. Nonnegativity: Our installed capacities, productions, and nonserved loads cannot be negative (this is physically not possible). 
+
+$x_g ≥ 0, y_{g,t} ≥ 0, nse_t ≥ 0$.
+
+In Julia, this translates to:
+```julia
+# Availability Constraints
+avail = zeros(length(G),length(T));
+avail[1,:] = thermal_cf[1]*ones(length(T));
+avail[2:4,:] = thermal_cf[2:4]*ones(length(T))';
+avail[5,:] = wind_cf;
+avail[6,:] = solar_cf;
+@constraint(gencap,availability[g in G, t in T], y[g,t] <= avail[g,t]*x[g]);
+
+# Load Constraints
+@constraint(gencap,load[t in T], sum(y[:,t]) + ns[t] == demand[t]);
+
+# Nonnegativity Constraints implemented when creating x, y, ns variables
+```
+
+## Problem 1.4
+
+```julia
+optimize!(gencap)
+```
+
+## Problem 1.5
+
+Answering the relevant questions using the following block of code:
+
+```julia
+# Installed Capacity for Each Generating Plant
+installed_capacity = value.(x);
+
+# Total Cost
+total_cost = objective_value(gencap);
+
+# Nonserved Energy
+nonserved_energy_total = sum(value.(ns));
+```
+
+Therefore we get that the installed capacities for geothermal, coal, CCGT, CT, wind and solar are 0 MW, 0 MW,
+1704 MW, 881 MW, 1238 MW, and 2729 MW respectively. The total cost for the expansion in this case would be 
+912,142,212 dollars, and the nonserved load would be 0 MW.
+
+## Problem 1.6
+
+```julia
+# Assign generations to generator type
+served_load = ones(length(G),length(T)); served_load[:,:]=value.(y)[:,:];
+
+using Plots
+
+# Plotting Line Plots for Raw Amounts
+plot(hours,served_load[1,:],label="Geo",xlabel="Hour",ylabel="Generation (MW)",title="Energy Generation vs Time");
+plot!(hours,served_load[2,:],label="Coal");
+plot!(hours,served_load[3,:],label="CCGT");
+plot!(hours,served_load[4,:],label="CT");
+plot!(hours,served_load[5,:],label="Wind");
+plot!(hours,served_load[6,:],label="Solar")
+
+# Plotting Area Plot for Overall Contributions
+areaplot(hours,served_load',label=permutedims(["Geo","Coal","CCGT","CT","Wind","Solar"]),xlabel="Hour",ylabel="Generation",title="Stacked Energy Generation vs Time")
+```
+
+# Problem 2
+
+## Problem 2.1
+
+## Problem 2.2
+
+## Problem 2.3
+
+## Problem 2.4
+
+## Problem 2.5
+
+# References
