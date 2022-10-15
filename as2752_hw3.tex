@@ -33,7 +33,7 @@
 
 \author{ Akanksha Srivastava (as2752) }
 
-\date{ 2022-10-14 }
+\date{ 2022-10-15 }
 
 \usepackage{upquote}
 \usepackage{listings}
@@ -308,13 +308,109 @@ Therefore we get that the installed capacities for geothermal, coal, CCGT, CT, w
 \end{lstlisting}
 \includegraphics[width=\linewidth]{figures/as2752_hw3_8_2.pdf}
 
+Notably, geothermal and coal are not providing any energy to the mix at any time. When solar has a high CF (i.e. in the middle of the day)  it is producing the majority of the electricity. When it does not, then the CCGT generator, which is not dependent on time of day, is taking  up the majority of the generation.
+
 \section{Problem 2}
 \subsection{Problem 2.1}
+Here, the only change that would be required would be adding an additional constraint on the total amount of emissions. The following Julia code block creates another model where the only change is this constraint.
+
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLn{gencap{\_}CO2}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Model}@*)(*@\HLJLp{(}@*)(*@\HLJLn{HiGHS}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{Optimizer}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@variable}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{x{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{G}@*)(*@\HLJLp{]}@*)(*@\HLJLoB{>=}@*)(*@\HLJLni{0}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@variable}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{G}@*)(*@\HLJLp{,}@*)(*@\HLJLn{T}@*)(*@\HLJLp{]}@*)(*@\HLJLoB{>=}@*)(*@\HLJLni{0}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@variable}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{ns{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{T}@*)(*@\HLJLp{]}@*)(*@\HLJLoB{>=}@*)(*@\HLJLni{0}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@objective}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{Min}@*)(*@\HLJLp{,}@*)(*@\HLJLn{investment{\_}cost}@*)(*@\HLJLoB{{\textquotesingle}*}@*)(*@\HLJLn{x{\_}CO2}@*) (*@\HLJLoB{+}@*) (*@\HLJLni{365}@*)(*@\HLJLoB{*}@*)(*@\HLJLp{(}@*)(*@\HLJLni{22}@*)(*@\HLJLoB{*}@*)(*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{])}@*) (*@\HLJLoB{+}@*) (*@\HLJLni{35}@*)(*@\HLJLoB{*}@*)(*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{])}@*) (*@\HLJLoB{+}@*) (*@\HLJLni{45}@*)(*@\HLJLoB{*}@*)(*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{])}@*) (*@\HLJLoB{+}@*) (*@\HLJLni{1000}@*)(*@\HLJLoB{*}@*)(*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{ns{\_}CO2}@*)(*@\HLJLp{)));}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@constraint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{availability}@*)(*@\HLJLp{[}@*)(*@\HLJLn{g}@*) (*@\HLJLkp{in}@*) (*@\HLJLn{G}@*)(*@\HLJLp{,}@*) (*@\HLJLn{t}@*) (*@\HLJLkp{in}@*) (*@\HLJLn{T}@*)(*@\HLJLp{],}@*) (*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{g}@*)(*@\HLJLp{,}@*)(*@\HLJLn{t}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{<=}@*) (*@\HLJLn{avail}@*)(*@\HLJLp{[}@*)(*@\HLJLn{g}@*)(*@\HLJLp{,}@*)(*@\HLJLn{t}@*)(*@\HLJLp{]}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{x{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{g}@*)(*@\HLJLp{]);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnd{@constraint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{load}@*)(*@\HLJLp{[}@*)(*@\HLJLn{t}@*) (*@\HLJLkp{in}@*) (*@\HLJLn{T}@*)(*@\HLJLp{],}@*) (*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLn{t}@*)(*@\HLJLp{])}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{ns{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLn{t}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{==}@*) (*@\HLJLn{demand}@*)(*@\HLJLp{[}@*)(*@\HLJLn{t}@*)(*@\HLJLp{]);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLcs{{\#}Adding}@*) (*@\HLJLcs{in}@*) (*@\HLJLcs{CO2}@*) (*@\HLJLcs{Constraint}@*)
+       (*@\HLJLnd{@constraint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{,}@*)(*@\HLJLn{emission{\_}limit}@*)(*@\HLJLp{,}@*) (*@\HLJLnfB{0.365}@*)(*@\HLJLoB{*}@*)(*@\HLJLnf{sum}@*)(*@\HLJLp{(}@*)(*@\HLJLn{co2{\_}emissions}@*)(*@\HLJLoB{{\textquotesingle}*}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{)}@*) (*@\HLJLoB{<=}@*) (*@\HLJLni{10}@*)(*@\HLJLoB{{\textasciicircum}}@*)(*@\HLJLni{3}@*)(*@\HLJLp{)}@*);
+\end{lstlisting}
+
 \subsection{Problem 2.2}
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{optimize!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{gencap{\_}CO2}@*)(*@\HLJLp{);}@*)
+Presolving model
+157 rows, 162 cols, 492 nonzeros
+157 rows, 162 cols, 492 nonzeros
+Presolve : Reductions: rows 157(-12); columns 162(-12); elements 492(-24)
+Solving the presolved LP
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 24(41167) 0s
+         93     1.1334512774e+09 Pr: 0(0) 0s
+Solving the original LP from the solution after postsolve
+Model   status      : Optimal
+Simplex   iterations: 93
+Objective value     :  1.1334512774e+09
+HiGHS run time      :          0.00
+\end{lstlisting}
+
 \subsection{Problem 2.3}
+Answering the relevant questions using the following block of code:
+
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLcs{{\#}}@*) (*@\HLJLcs{Installed}@*) (*@\HLJLcs{Capacity}@*) (*@\HLJLcs{for}@*) (*@\HLJLcs{Each}@*) (*@\HLJLcs{Generating}@*) (*@\HLJLcs{Plant}@*)
+       (*@\HLJLn{installed{\_}capacity{\_}CO2}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{value}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x{\_}CO2}@*)(*@\HLJLp{)}@*);
+\end{lstlisting}
+
+With the CO2 limit, the installed capacities for geothermal, coal, CCGT, CT, wind and solar are  1668 MW, 0 MW, 757 MW, 470 MW, 611 MW, and 1519 MW respectively. This is notably different from the model in Problem 1 because the geothermal installed capacity becomes nonzero (and quite high), and the CCGT and CT capacities decrease  significantly. The wind and solar capacities also decrease.
+
 \subsection{Problem 2.4}
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLcs{{\#}}@*) (*@\HLJLcs{Assign}@*) (*@\HLJLcs{generations}@*) (*@\HLJLcs{to}@*) (*@\HLJLcs{generator}@*) (*@\HLJLcs{type}@*)
+       (*@\HLJLn{served{\_}load{\_}CO2}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{G}@*)(*@\HLJLp{),}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{T}@*)(*@\HLJLp{));}@*) (*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*)(*@\HLJLoB{=}@*)(*@\HLJLn{value}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y{\_}CO2}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{];}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLk{using}@*) (*@\HLJLn{Plots}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLcs{{\#}}@*) (*@\HLJLcs{Plotting}@*) (*@\HLJLcs{Line}@*) (*@\HLJLcs{Plots}@*) (*@\HLJLcs{for}@*) (*@\HLJLcs{Raw}@*) (*@\HLJLcs{Amounts}@*)
+       (*@\HLJLnf{plot}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Geo"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{xlabel}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Hour"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{ylabel}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Generation}@*) (*@\HLJLs{(MW)"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{title}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Energy}@*) (*@\HLJLs{Generation}@*) (*@\HLJLs{vs}@*) (*@\HLJLs{Time}@*) (*@\HLJLs{with}@*) (*@\HLJLs{CO2}@*) (*@\HLJLs{Limit"{}}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{plot!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Coal"{}}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{plot!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}CCGT"{}}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{plot!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}CT"{}}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{plot!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{5}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Wind"{}}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLnB{julia>}@*) (*@\HLJLnf{plot!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLp{[}@*)(*@\HLJLni{6}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{],}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Solar"{}}@*))
+\end{lstlisting}
+\includegraphics[width=\linewidth]{figures/as2752_hw3_12_1.pdf}
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLcs{{\#}}@*) (*@\HLJLcs{Plotting}@*) (*@\HLJLcs{Area}@*) (*@\HLJLcs{Plot}@*) (*@\HLJLcs{for}@*) (*@\HLJLcs{Overall}@*) (*@\HLJLcs{Contributions}@*)
+       (*@\HLJLnf{areaplot}@*)(*@\HLJLp{(}@*)(*@\HLJLn{hours}@*)(*@\HLJLp{,}@*)(*@\HLJLn{served{\_}load{\_}CO2}@*)(*@\HLJLoB{{\textquotesingle}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{label}@*)(*@\HLJLoB{=}@*)(*@\HLJLnf{permutedims}@*)(*@\HLJLp{([}@*)(*@\HLJLs{"{}Geo"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}Coal"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}CCGT"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}CT"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}Wind"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}Solar"{}}@*)(*@\HLJLp{]),}@*)(*@\HLJLn{xlabel}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Hour"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{ylabel}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Generation"{}}@*)(*@\HLJLp{,}@*)(*@\HLJLn{title}@*)(*@\HLJLoB{=}@*)(*@\HLJLs{"{}Stacked}@*) (*@\HLJLs{Energy}@*) (*@\HLJLs{Generation}@*) (*@\HLJLs{vs}@*) (*@\HLJLs{Time}@*) (*@\HLJLs{with}@*) (*@\HLJLs{CO2}@*) (*@\HLJLs{Limit"{}}@*))
+\end{lstlisting}
+\includegraphics[width=\linewidth]{figures/as2752_hw3_12_2.pdf}
+
+The key difference is the contribution of the geothermal generator. Of the remaining generation types, the breakdown or fairly similar (though not the same).  This is why all generations but the coal (which stayed at 0 MW) decreased.
+
 \subsection{Problem 2.5}
+We can determine the value to the utility of allowing it to emit an additional 1000 tCO2/yr by implemented the following code in Julia.  Note that in order to find the added value of 1000 tCO2/yr instead of 1 tCO2/yr, we had to alter the CO2 constraint so that the limit was  in terms of 1000 tCO2/yr.
+
+
+\begin{lstlisting}
+(*@\HLJLnB{julia>}@*) (*@\HLJLn{shadow{\_}price}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLn{emission{\_}limit}@*)(*@\HLJLp{)}@*);
+\end{lstlisting}
+
+This tells us that the added value (i.e. the total cost would decrease by) 156,844.22 dollars if the limit was increased by 1000 tCO2/yr.
+
 \section{References}
+\begin{itemize}
+\item[1. ] Using areaplot(): https://docs.juliaplots.org/dev/api/\#Plots.areaplot
+
+\end{itemize}
 
 
 \end{document}

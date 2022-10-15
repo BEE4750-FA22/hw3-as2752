@@ -148,16 +148,81 @@ plot!(hours,served_load[6,:],label="Solar")
 areaplot(hours,served_load',label=permutedims(["Geo","Coal","CCGT","CT","Wind","Solar"]),xlabel="Hour",ylabel="Generation",title="Stacked Energy Generation vs Time")
 ```
 
+Notably, geothermal and coal are not providing any energy to the mix at any time. When solar has a high CF (i.e. in the middle of the day) 
+it is producing the majority of the electricity. When it does not, then the CCGT generator, which is not dependent on time of day, is taking 
+up the majority of the generation.
+
 # Problem 2
 
 ## Problem 2.1
+Here, the only change that would be required would be adding an additional constraint on the total amount of emissions.
+The following Julia code block creates another model where the only change is this constraint.
+
+```julia
+gencap_CO2 = Model(HiGHS.Optimizer);
+@variable(gencap_CO2,x_CO2[G]>=0);
+@variable(gencap_CO2,y_CO2[G,T]>=0);
+@variable(gencap_CO2,ns_CO2[T]>=0);
+@objective(gencap_CO2,Min,investment_cost'*x_CO2 + 365*(22*sum(y_CO2[2,:]) + 35*sum(y_CO2[3,:]) + 45*sum(y_CO2[4,:]) + 1000*sum(ns_CO2)));
+@constraint(gencap_CO2,availability[g in G, t in T], y_CO2[g,t] <= avail[g,t]*x_CO2[g]);
+@constraint(gencap_CO2,load[t in T], sum(y_CO2[:,t]) + ns_CO2[t] == demand[t]);
+
+#Adding in CO2 Constraint
+@constraint(gencap_CO2,emission_limit, 0.365*sum(co2_emissions'*y_CO2) <= 10^3);
+```
 
 ## Problem 2.2
 
+```julia
+optimize!(gencap_CO2);
+```
+
 ## Problem 2.3
+Answering the relevant questions using the following block of code:
+
+```julia
+# Installed Capacity for Each Generating Plant
+installed_capacity_CO2 = value.(x_CO2);
+```
+
+With the CO2 limit, the installed capacities for geothermal, coal, CCGT, CT, wind and solar are 
+1668 MW, 0 MW, 757 MW, 470 MW, 611 MW, and 1519 MW respectively. This is notably different from the model in Problem 1
+because the geothermal installed capacity becomes nonzero (and quite high), and the CCGT and CT capacities decrease 
+significantly. The wind and solar capacities also decrease.
 
 ## Problem 2.4
 
+```julia
+# Assign generations to generator type
+served_load_CO2 = ones(length(G),length(T)); served_load_CO2[:,:]=value.(y_CO2)[:,:];
+
+using Plots
+
+# Plotting Line Plots for Raw Amounts
+plot(hours,served_load_CO2[1,:],label="Geo",xlabel="Hour",ylabel="Generation (MW)",title="Energy Generation vs Time with CO2 Limit");
+plot!(hours,served_load_CO2[2,:],label="Coal");
+plot!(hours,served_load_CO2[3,:],label="CCGT");
+plot!(hours,served_load_CO2[4,:],label="CT");
+plot!(hours,served_load_CO2[5,:],label="Wind");
+plot!(hours,served_load_CO2[6,:],label="Solar")
+
+# Plotting Area Plot for Overall Contributions
+areaplot(hours,served_load_CO2',label=permutedims(["Geo","Coal","CCGT","CT","Wind","Solar"]),xlabel="Hour",ylabel="Generation",title="Stacked Energy Generation vs Time with CO2 Limit")
+```
+
+The key difference is the contribution of the geothermal generator. Of the remaining generation types, the breakdown or fairly similar (though not the same). 
+This is why all generations but the coal (which stayed at 0 MW) decreased.
+
 ## Problem 2.5
+We can determine the value to the utility of allowing it to emit an additional 1000 tCO2/yr by implemented the following code in Julia. 
+Note that in order to find the added value of 1000 tCO2/yr instead of 1 tCO2/yr, we had to alter the CO2 constraint so that the limit was 
+in terms of 1000 tCO2/yr.
+
+```julia
+shadow_price.(emission_limit);
+```
+
+This tells us that the added value (i.e. the total cost would decrease by) 156,844.22 dollars if the limit was increased by 1000 tCO2/yr.
 
 # References
+1. Using areaplot(): https://docs.juliaplots.org/dev/api/#Plots.areaplot

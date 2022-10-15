@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.8.31)  14 OCT 2022 14:07
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.8.31)  15 OCT 2022 11:01
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1084,17 +1084,32 @@ o(0)/m/n/10 ”Generation”[],title[]\TU/FiraMono(0)/b/n/10 =[][]\TU/FiraMono(0
 
 File: figures/as2752_hw3_8_2.pdf Graphic file (type pdf)
 <use figures/as2752_hw3_8_2.pdf>
-[4] [5] (./as2752_hw3.aux)
+[4] [5] [6]
+File: figures/as2752_hw3_12_1.pdf Graphic file (type pdf)
+<use figures/as2752_hw3_12_1.pdf>
+
+Overfull \hbox (356.4295pt too wide) in paragraph at lines 393--394
+[][]\TU/FiraMono(0)/m/n/10 areaplot[](hours,served_load_CO2[][][],label[]\TU/Fi
+raMono(0)/b/n/10 =[][]\TU/FiraMono(0)/m/n/10 permutedims[]([[]”Geo”[],[]”Coal”[
+],[]”CCGT”[],[]”CT”[],[]”Wind”[],[]”Solar”[]]),xlabel[]\TU/FiraMono(0)/b/n/10 =
+[][]\TU/FiraMono(0)/m/n/10 ”Hour”[],ylabel[]\TU/FiraMono(0)/b/n/10 =[][]\TU/Fir
+aMono(0)/m/n/10 ”Generation”[],title[]\TU/FiraMono(0)/b/n/10 =[][]\TU/FiraMono(
+0)/m/n/10 ”Stacked[][] 
+ []
+
+File: figures/as2752_hw3_12_2.pdf Graphic file (type pdf)
+<use figures/as2752_hw3_12_2.pdf>
+[7] [8] (./as2752_hw3.aux)
 Package rerunfilecheck Info: File `as2752_hw3.out' has not changed.
 (rerunfilecheck)             Checksum: F018145D86253EECBA09614A52C3F8A1;1520.
  ) 
 Here is how much of TeX's memory you used:
- 17606 strings out of 476179
- 334213 string characters out of 5809544
+ 17622 strings out of 476179
+ 334731 string characters out of 5809544
  835724 words of memory out of 5000000
- 38098 multiletter control sequences out of 15000+600000
+ 38112 multiletter control sequences out of 15000+600000
  502281 words of font info for 118 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 88i,6n,111p,1007b,1755s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 88i,6n,111p,1007b,1757s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on as2752_hw3.pdf (5 pages).
+Output written on as2752_hw3.pdf (8 pages).
